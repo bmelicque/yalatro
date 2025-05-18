@@ -40,7 +40,7 @@ const world = new CANNON.World({
 	gravity: new CANNON.Vec3(0, -100, 0),
 });
 
-buildArena(scene, world);
+const updateArena = buildArena(scene, world);
 const dice = new Dice();
 const angle = 2 * Math.PI * Math.random();
 const speed = 20 + 5 * Math.random();
@@ -64,6 +64,7 @@ function animate() {
 	world.step(1 / 60);
 
 	dice.sync();
+	updateArena();
 
 	controls.update();
 
