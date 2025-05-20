@@ -2,7 +2,6 @@
 #define DISTANCE_FACTOR 1.0
 #define colour_1 vec4(.15, .3, .2, 1.)
 #define colour_2 vec4(.3,  .6, .4,  1.)
-#define colour_3 vec4(0., 0., 0., 1.)
 #define contrast 1.5
 
 uniform float time;

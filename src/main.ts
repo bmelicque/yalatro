@@ -41,37 +41,31 @@ const world = new CANNON.World({
 });
 
 const updateArena = buildArena(scene, world);
-const dice = new Dice();
-const angle = 2 * Math.PI * Math.random();
-const speed = 20 + 5 * Math.random();
-dice.setPosition(0, 1, 0);
-dice.setVelocity(speed * Math.cos(angle), 0, speed * Math.sin(angle));
-const q = new CANNON.Quaternion(Math.random(), Math.random(), Math.random(), Math.random()).normalize();
-dice.setQuaternion(q.x, q.y, q.z, q.w);
-scene.add(dice.mesh);
-world.addBody(dice.body);
+for (let i = 0; i < 3; i++) {}
 
-const result = document.createElement("div");
-result.style.position = "absolute";
-result.style.left = `${innerWidth / 2}px`;
-result.style.top = `${innerHeight / 2}px`;
-result.style.transform = "translate(-50%, -50%)";
-result.style.fontSize = "15rem";
-document.body.appendChild(result);
+const dice: Dice[] = [];
+for (let i = 0; i < 3; i++) {
+	for (let j = 0; j < 3; j++) {
+		const die = new Dice();
+		const angle = 2 * Math.PI * Math.random();
+		const speed = 20 + 5 * Math.random();
+		die.setPosition(5 * (i - 1), 1, 5 * (j - 1));
+		die.setVelocity(speed * Math.cos(angle), 0, speed * Math.sin(angle));
+		const q = new CANNON.Quaternion(Math.random(), Math.random(), Math.random(), Math.random()).normalize();
+		die.setQuaternion(q.x, q.y, q.z, q.w);
+		scene.add(die.mesh);
+		world.addBody(die.body);
+		dice.push(die);
+	}
+}
+
 function animate() {
 	requestAnimationFrame(animate);
 
 	world.step(1 / 60);
-
-	dice.sync();
+	dice.forEach((die) => (die.sync(), die.isMoving() || die.freeze()));
 	updateArena();
-
 	controls.update();
-
-	if (!dice.isMoving()) {
-		result.innerText = `${dice.topFace}`;
-		dice.freeze();
-	}
 
 	renderer.render(scene, camera);
 }
