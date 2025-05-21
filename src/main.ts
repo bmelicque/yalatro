@@ -3,6 +3,9 @@ import * as CANNON from "cannon-es";
 import { OrbitControls } from "three/examples/jsm/Addons.js";
 import { buildArena, HEIGHT } from "./arena";
 import { Dice } from "./dice";
+import { ShaderBackground } from "./background/background";
+
+customElements.define("shader-background", ShaderBackground);
 
 function width() {
 	return (innerWidth / innerHeight) * HEIGHT;
@@ -30,16 +33,16 @@ const light = new THREE.DirectionalLight(0xffffff, 1);
 light.position.set(5, 10, 7.5);
 scene.add(light);
 const camera = makeCamera();
-const renderer = new THREE.WebGLRenderer();
+const renderer = new THREE.WebGLRenderer({ alpha: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.domElement.id = "game";
 document.body.appendChild(renderer.domElement);
 const controls = makeControls(camera, renderer);
 const world = new CANNON.World({
 	gravity: new CANNON.Vec3(0, -100, 0),
 });
 
-const updateArena = buildArena(scene, world);
-for (let i = 0; i < 3; i++) {}
+buildArena(world);
 
 const dice: Dice[] = [];
 for (let i = 0; i < 3; i++) {
@@ -62,9 +65,20 @@ function animate() {
 
 	world.step(1 / 60);
 	dice.forEach((die) => (die.sync(), die.isMoving() || die.freeze()));
-	updateArena();
+	if (!dice.find((die) => die.isMoving())) {
+		storeDice();
+	}
 	controls.update();
 
 	renderer.render(scene, camera);
 }
 animate();
+
+function storeDice() {
+	dice.sort((a, b) => b.topFace - a.topFace);
+	const margin = 0.02 * width();
+	const startX = -0.24 * width() + margin;
+	const endX = 0.48 * width() - margin;
+	const step = (endX - startX) / dice.length;
+	dice.forEach((die, i) => die.setPosition(startX + step * (i + 0.5), die.position.y, HEIGHT * 0.25));
+}

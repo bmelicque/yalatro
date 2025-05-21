@@ -106,6 +106,10 @@ export class Dice {
 		return FACES[topFaceIndex];
 	}
 
+	get position() {
+		return this.#body.position;
+	}
+
 	setPosition(x: number, y: number, z: number) {
 		this.#body.position.set(x, y, z);
 		this.#mesh.position.copy(this.#body.position as unknown as THREE.Vector3);
