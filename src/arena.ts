@@ -3,7 +3,7 @@ import * as THREE from "three";
 import vertexShader from "./arena.vert?raw";
 import fragmentShader from "./arena.frag?raw";
 
-const HEIGHT = 12;
+export const HEIGHT = 20;
 const WALL_WIDTH = 1;
 
 function width() {
@@ -20,7 +20,7 @@ function makeBody(shape: CANNON.Vec3, position: CANNON.Vec3) {
 }
 
 export function buildArena(scene: THREE.Scene, world: CANNON.World): () => void {
-	const groundGeo = new THREE.BoxGeometry(24, 1, 12);
+	const groundGeo = new THREE.BoxGeometry(HEIGHT * 2, 1, HEIGHT);
 	const groundMat = new THREE.ShaderMaterial({
 		uniforms: {
 			time: { value: performance.now() / 1000 },

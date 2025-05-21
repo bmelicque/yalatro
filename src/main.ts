@@ -1,10 +1,8 @@
 import * as THREE from "three";
 import * as CANNON from "cannon-es";
 import { OrbitControls } from "three/examples/jsm/Addons.js";
-import { buildArena } from "./arena";
+import { buildArena, HEIGHT } from "./arena";
 import { Dice } from "./dice";
-
-const HEIGHT = 12;
 
 function width() {
 	return (innerWidth / innerHeight) * HEIGHT;
