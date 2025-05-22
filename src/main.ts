@@ -4,7 +4,7 @@ import { buildArena, HEIGHT } from "./arena";
 import { Dice } from "./dice";
 import { ShaderBackground } from "./background/background";
 import { getDieRotation } from "./dice/quaternion";
-import { animateDiePosition, animateDieQuaternion } from "./animate";
+import { animateDiePosition, animateDieQuaternion, oscillateDie } from "./animate";
 
 customElements.define("shader-background", ShaderBackground);
 
@@ -73,7 +73,15 @@ function storeDice() {
 		const duration = 300;
 		const delay = 20 * i;
 		const position = new THREE.Vector3(startX + step * (i + 0.5), die.position.y, HEIGHT * 0.35);
-		animateDiePosition({ die, to: position, duration, delay });
 		animateDieQuaternion({ die, to: getDieRotation(die), duration, delay });
+		animateDiePosition({
+			die,
+			to: position,
+			duration,
+			delay,
+			then: (die) => {
+				oscillateDie(die);
+			},
+		});
 	});
 }
