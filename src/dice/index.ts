@@ -18,7 +18,7 @@ function texturePositions() {
 	return _texturePositions;
 }
 
-const FACES = [15, 5, 13, 1, 7, 18, 12, 17, 19, 11, 20, 8, 16, 6, 14, 2, 10, 3, 9, 4];
+export const FACES = [15, 5, 13, 1, 7, 18, 12, 17, 19, 11, 20, 8, 16, 6, 14, 2, 10, 3, 9, 4];
 
 const tex = new THREE.TextureLoader().load("/tex.png");
 export class Dice {
@@ -117,6 +117,10 @@ export class Dice {
 
 	setVelocity(x: number, y: number, z: number) {
 		this.#body.velocity.set(x, y, z);
+	}
+
+	get quaternion() {
+		return this.#mesh.quaternion;
 	}
 
 	setQuaternion(x: number, y: number, z: number, w: number) {

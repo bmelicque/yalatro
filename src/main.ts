@@ -1,9 +1,10 @@
 import * as THREE from "three";
 import * as CANNON from "cannon-es";
-import { OrbitControls } from "three/examples/jsm/Addons.js";
 import { buildArena, HEIGHT } from "./arena";
 import { Dice } from "./dice";
 import { ShaderBackground } from "./background/background";
+import { getDieRotation } from "./dice/quaternion";
+import { animateDiePosition, animateDieQuaternion } from "./animate";
 
 customElements.define("shader-background", ShaderBackground);
 
@@ -18,16 +19,6 @@ function makeCamera() {
 	return camera;
 }
 
-function makeControls(camera: THREE.Camera, renderer: THREE.WebGLRenderer) {
-	const controls = new OrbitControls(camera, renderer.domElement);
-	controls.enableDamping = true; // optional for smoother feel
-	controls.dampingFactor = 0.1;
-	controls.autoRotate = false;
-	controls.target.set(0, 0, 0); // look at center
-	controls.update();
-	return controls;
-}
-
 const scene = new THREE.Scene();
 const light = new THREE.DirectionalLight(0xffffff, 1);
 light.position.set(5, 10, 7.5);
@@ -37,7 +28,6 @@ const renderer = new THREE.WebGLRenderer({ alpha: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.domElement.id = "game";
 document.body.appendChild(renderer.domElement);
-const controls = makeControls(camera, renderer);
 const world = new CANNON.World({
 	gravity: new CANNON.Vec3(0, -100, 0),
 });
@@ -68,7 +58,6 @@ function animate() {
 	if (!dice.find((die) => die.isMoving())) {
 		storeDice();
 	}
-	controls.update();
 
 	renderer.render(scene, camera);
 }
@@ -77,8 +66,14 @@ animate();
 function storeDice() {
 	dice.sort((a, b) => b.topFace - a.topFace);
 	const margin = 0.02 * width();
-	const startX = -0.24 * width() + margin;
+	const startX = -0.22 * width() + margin;
 	const endX = 0.48 * width() - margin;
 	const step = (endX - startX) / dice.length;
-	dice.forEach((die, i) => die.setPosition(startX + step * (i + 0.5), die.position.y, HEIGHT * 0.25));
+	dice.forEach((die, i) => {
+		const duration = 300;
+		const delay = 20 * i;
+		const position = new THREE.Vector3(startX + step * (i + 0.5), die.position.y, HEIGHT * 0.35);
+		animateDiePosition({ die, to: position, duration, delay });
+		animateDieQuaternion({ die, to: getDieRotation(die), duration, delay });
+	});
 }

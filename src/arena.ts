@@ -1,6 +1,6 @@
 import * as CANNON from "cannon-es";
 
-export const HEIGHT = 20;
+export const HEIGHT = 17;
 const WALL_WIDTH = 1;
 
 export function width() {
