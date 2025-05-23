@@ -1,3 +1,5 @@
+@use "sass:color";
+
 :root {
 	font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
 	line-height: 1.5;
@@ -26,29 +28,80 @@ shader-background {
 	z-index: -10;
 }
 
+#bottom-zone {
+	position: absolute;
+	z-index: 0;
+	bottom: 4vh;
+	right: 5vw;
+	height: 27vh;
+	width: 90vw;
+}
+
 #dice-zone {
 	position: absolute;
 	z-index: 0;
 	bottom: 4vh;
-	right: 2vw;
+	left: 5vw;
 	height: 27vh;
 	width: 70vw;
 	border-radius: 1rem;
 	background: rgba(0, 0, 0, 0.3);
 }
 
+#actions {
+	z-index: 20;
+	position: absolute;
+	right: 5vw;
+	height: 27vh;
+	bottom: 4vh;
+	width: 19vw;
+
+	.action {
+		right: 0;
+		left: 0;
+		height: 47%;
+	}
+}
+
+.action {
+	position: absolute;
+	border-radius: 1rem;
+	border: none;
+	font-size: 2rem;
+	--color: rgba(0, 0, 0, 0.3);
+	background-color: var(--color);
+	box-shadow: 1px 0.25rem color-mix(in srgb, var(--color), black 20%);
+	cursor: pointer;
+
+	&--play {
+		top: 0;
+		--color: #2d82b7;
+	}
+
+	&--discard {
+		bottom: 0;
+		--color: #a30015;
+	}
+
+	&:disabled {
+		--color: rgba(0, 0, 0, 0.3);
+	}
+}
+
 #game {
 	z-index: 10;
+	pointer-events: none;
 }
 
 #score-panel {
 	position: absolute;
 	z-index: 20;
-	top: 0;
-	bottom: 0;
-	right: 74vw;
-	width: 22vw;
+	top: -2rem;
+	height: 17vh;
+	left: 50vw;
+	width: 70vw;
+	transform: translateX(-50%);
 	background: #242424;
-	border-left: 0.25rem solid #111;
-	border-right: 0.25rem solid #111;
+	border-radius: 1rem;
+	border: 0.25rem solid #111;
 }

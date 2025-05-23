@@ -12,11 +12,11 @@ const zone = {
 	},
 
 	get left() {
-		return -0.22 * width() + zone.margin;
+		return -0.46 * width() + zone.margin;
 	},
 
 	get right() {
-		return 0.48 * width() - zone.margin;
+		return 0.25 * width() - zone.margin;
 	},
 
 	get bottomRow() {
@@ -59,5 +59,16 @@ export function moveToZone(dice: Dice[], index: number, params: MoveToZoneParams
 			then: (die) => die.animate(oscillateDie),
 		});
 		return () => stopP() && stopQ();
+	});
+}
+
+export function storeDice(dice: Dice[]) {
+	dice.sort((a, b) => b.topFace - a.topFace);
+	dice.forEach((_, i) => {
+		moveToZone(dice, i, {
+			row: "bottom",
+			duration: 300,
+			delay: 20 * i,
+		});
 	});
 }

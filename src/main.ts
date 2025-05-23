@@ -3,8 +3,8 @@ import * as THREE from "three";
 import { buildArena, HEIGHT } from "./arena";
 import { ShaderBackground } from "./background/background";
 import { Dice } from "./dice";
-import { moveToZone } from "./dice-zone";
 import { DieDetector } from "./mouse";
+import { StateMachine } from "./state";
 
 customElements.define("shader-background", ShaderBackground);
 
@@ -50,58 +50,32 @@ for (let i = 0; i < 3; i++) {
 	}
 }
 
-type State = "throwing" | "idle";
-let state: State = "throwing";
-const selected: Dice[] = [];
+const state = new StateMachine(dice);
 
 const dieDetector = new DieDetector({ renderer, camera, dice });
 document.body.addEventListener("mousemove", (e) => {
 	const hovered = dieDetector.findHovered(e);
-	document.body.style.cursor = hovered && state === "idle" ? "pointer" : "auto";
-	if (state === "idle") {
-	}
+	document.body.style.cursor = hovered && state.state === "selecting" ? "pointer" : "auto";
 });
 document.body.addEventListener("click", (e) => {
 	const hovered = dieDetector.findHovered(e);
 	if (!hovered?.isFrozen) return;
-	if (selected.includes(hovered)) {
-		const index = selected.indexOf(hovered);
-		selected.splice(index, 1);
-		moveToZone(dice, dice.indexOf(hovered), {
-			row: "bottom",
-			duration: 100,
-		});
-	} else if (selected.length < 5) {
-		selected.push(hovered);
-		selected.sort((a, b) => b.topFace - a.topFace);
-		moveToZone(dice, dice.indexOf(hovered), {
-			row: "top",
-			duration: 50,
-		});
-	}
+	state.toggleSelect(hovered);
+	// FIXME: unlock .action-play when callbacks are implemented
+	document
+		.querySelectorAll(".action--discard")
+		.forEach((btn) => ((btn as HTMLButtonElement).disabled = !state.hasSelection));
+});
+document.getElementById("discard")?.addEventListener("click", () => {
+	state.throw();
 });
 
 function animate() {
 	requestAnimationFrame(animate);
 
 	world.step(1 / 60);
-	dice.forEach((die) => (die.sync(), die.isMoving() || die.freeze()));
-	if (state === "throwing" && !dice.find((die) => die.isMoving())) {
-		storeDice();
-		state = "idle";
-	}
+	state.update();
 
 	renderer.render(scene, camera);
 }
 animate();
-
-function storeDice() {
-	dice.sort((a, b) => b.topFace - a.topFace);
-	dice.forEach((_, i) => {
-		moveToZone(dice, i, {
-			row: "bottom",
-			duration: 300,
-			delay: 20 * i,
-		});
-	});
-}
