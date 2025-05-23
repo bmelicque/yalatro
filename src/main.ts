@@ -61,13 +61,12 @@ document.body.addEventListener("click", (e) => {
 	const hovered = dieDetector.findHovered(e);
 	if (!hovered?.isFrozen) return;
 	state.toggleSelect(hovered);
-	// FIXME: unlock .action-play when callbacks are implemented
-	document
-		.querySelectorAll(".action--discard")
-		.forEach((btn) => ((btn as HTMLButtonElement).disabled = !state.hasSelection));
 });
 document.getElementById("discard")?.addEventListener("click", () => {
-	state.throw();
+	state.discard();
+});
+document.getElementById("score")?.addEventListener("click", () => {
+	state.score();
 });
 
 function animate() {
@@ -75,6 +74,8 @@ function animate() {
 
 	world.step(1 / 60);
 	state.update();
+
+	document.querySelectorAll(".action").forEach((btn) => ((btn as HTMLButtonElement).disabled = !state.hasSelection));
 
 	renderer.render(scene, camera);
 }

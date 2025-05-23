@@ -73,7 +73,7 @@ shader-background {
 	box-shadow: 1px 0.25rem color-mix(in srgb, var(--color), black 20%);
 	cursor: pointer;
 
-	&--play {
+	&--score {
 		top: 0;
 		--color: #2d82b7;
 	}

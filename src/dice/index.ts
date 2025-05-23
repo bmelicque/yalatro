@@ -161,8 +161,8 @@ export class Dice {
 
 		const velocity = new THREE.Vector2(-this.position.x, -this.position.z)
 			.normalize()
-			.add(new THREE.Vector2(Math.random() * 0.5, Math.random() * 0.5).normalize().multiplyScalar(0.5))
-			.multiplyScalar(40 + 10 * Math.random());
+			.add(new THREE.Vector2(Math.random() - 0.5, Math.random() - 0.5).normalize().multiplyScalar(0.25))
+			.multiplyScalar(20 + 50 * Math.random());
 		this.setVelocity(velocity.x, 0, velocity.y);
 	}
 

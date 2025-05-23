@@ -65,16 +65,22 @@ function randomSign() {
 	return Math.random() > 0.5 ? 1 : -1;
 }
 
-export function oscillateDie(die: Dice) {
+type OscillateParams = {
+	pulse: number;
+	width: number;
+	height: number;
+};
+
+function _oscillateDie(die: Dice, params: OscillateParams) {
 	const start = performance.now();
 	let frameHandle = 0;
 	const position = die.position.clone();
 	const quaternion = die.quaternion.clone();
 
-	const dx = (randomSign() * (Math.random() + 1)) / 32;
-	const dz = (randomSign() * (Math.random() + 1)) / 16;
-	const wx = 1 + Math.random();
-	const wz = 1 + Math.random();
+	const dx = ((randomSign() * (Math.random() + 1) * 2) / 3) * params.width;
+	const dz = ((randomSign() * (Math.random() + 1) * 2) / 3) * params.height;
+	const wx = (((1 + Math.random()) * 2) / 3) * params.pulse;
+	const wz = (((1 + Math.random()) * 2) / 3) * params.pulse;
 
 	const x = (t: number) => dx * Math.cos((wx * Math.max(0, t - start)) / 1_000);
 	const z = (t: number) => dz * Math.cos((wz * Math.max(0, t - start)) / 1_000);
@@ -95,4 +101,20 @@ export function oscillateDie(die: Dice) {
 	animate();
 
 	return () => cancelAnimationFrame(frameHandle);
+}
+
+export function oscillateDie(die: Dice) {
+	return _oscillateDie(die, {
+		pulse: 1.5,
+		width: 1 / 32,
+		height: 1 / 16,
+	});
+}
+
+export function shakeDie(die: Dice) {
+	return _oscillateDie(die, {
+		pulse: 100,
+		width: 1 / 32,
+		height: 1 / 16,
+	});
 }

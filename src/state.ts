@@ -1,5 +1,7 @@
+import { oscillateDie, shakeDie } from "./animate";
 import type { Dice } from "./dice";
 import { moveToZone, storeDice } from "./dice-zone";
+import { scoreDice } from "./score-zone";
 
 type State = "throwing" | "selecting";
 
@@ -45,12 +47,32 @@ export class StateMachine {
 		});
 	}
 
-	throw() {
+	discard() {
 		if (this.#selected.length === 0) return;
 		this.#state = "throwing";
 		this.#selected.forEach((die) => die.throw());
 		this.#selected.length = 0;
 		this.#thrownAt = performance.now();
+	}
+
+	score() {
+		if (this.#selected.length === 0) return;
+		const selection = [...this.#selected];
+		this.#selected.length = 0;
+		scoreDice(selection);
+		storeDice(this.#dice.filter((die) => !selection.includes(die)));
+		const interval = 400;
+		const shakeDelay = 600;
+		const shakeDuration = 300;
+		selection.forEach((die, i) => {
+			setTimeout(() => die.animate(shakeDie), shakeDelay + interval * i);
+			setTimeout(() => die.animate(oscillateDie), shakeDelay + shakeDuration + interval * i);
+		});
+		setTimeout(() => {
+			this.#state = "throwing";
+			selection.forEach((die) => die.throw());
+			this.#thrownAt = performance.now();
+		}, shakeDelay + shakeDuration + interval * selection.length);
 	}
 
 	update() {
