@@ -22,6 +22,7 @@ export const FACES = [15, 5, 13, 1, 7, 18, 12, 17, 19, 11, 20, 8, 16, 6, 14, 2, 
 
 const tex = new THREE.TextureLoader().load("/tex.png");
 export class Dice {
+	#stopAnimation: (() => void) | null = null;
 	#mesh: THREE.Mesh;
 	#body!: CANNON.Body;
 
@@ -140,12 +141,21 @@ export class Dice {
 		this.#mesh.geometry.setAttribute("normal", new THREE.BufferAttribute(new Float32Array(this.normals), 3));
 	}
 
+	get isFrozen() {
+		return this.#body.sleepState === CANNON.BODY_SLEEP_STATES.SLEEPING;
+	}
+
 	freeze() {
 		this.#body.sleep();
 	}
 
 	thaw() {
 		this.#body.wakeUp();
+	}
+
+	animate(predicate: (die: Dice) => () => void) {
+		this.#stopAnimation?.();
+		this.#stopAnimation = predicate(this);
 	}
 }
 

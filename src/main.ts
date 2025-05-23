@@ -1,10 +1,10 @@
-import * as THREE from "three";
 import * as CANNON from "cannon-es";
+import * as THREE from "three";
 import { buildArena, HEIGHT } from "./arena";
-import { Dice } from "./dice";
 import { ShaderBackground } from "./background/background";
-import { getDieRotation } from "./dice/quaternion";
-import { animateDiePosition, animateDieQuaternion, oscillateDie } from "./animate";
+import { Dice } from "./dice";
+import { moveToZone } from "./dice-zone";
+import { DieDetector } from "./mouse";
 
 customElements.define("shader-background", ShaderBackground);
 
@@ -50,13 +50,45 @@ for (let i = 0; i < 3; i++) {
 	}
 }
 
+type State = "throwing" | "idle";
+let state: State = "throwing";
+const selected: Dice[] = [];
+
+const dieDetector = new DieDetector({ renderer, camera, dice });
+document.body.addEventListener("mousemove", (e) => {
+	const hovered = dieDetector.findHovered(e);
+	document.body.style.cursor = hovered && state === "idle" ? "pointer" : "auto";
+	if (state === "idle") {
+	}
+});
+document.body.addEventListener("click", (e) => {
+	const hovered = dieDetector.findHovered(e);
+	if (!hovered?.isFrozen) return;
+	if (selected.includes(hovered)) {
+		const index = selected.indexOf(hovered);
+		selected.splice(index, 1);
+		moveToZone(dice, dice.indexOf(hovered), {
+			row: "bottom",
+			duration: 100,
+		});
+	} else if (selected.length < 5) {
+		selected.push(hovered);
+		selected.sort((a, b) => b.topFace - a.topFace);
+		moveToZone(dice, dice.indexOf(hovered), {
+			row: "top",
+			duration: 50,
+		});
+	}
+});
+
 function animate() {
 	requestAnimationFrame(animate);
 
 	world.step(1 / 60);
 	dice.forEach((die) => (die.sync(), die.isMoving() || die.freeze()));
-	if (!dice.find((die) => die.isMoving())) {
+	if (state === "throwing" && !dice.find((die) => die.isMoving())) {
 		storeDice();
+		state = "idle";
 	}
 
 	renderer.render(scene, camera);
@@ -65,23 +97,11 @@ animate();
 
 function storeDice() {
 	dice.sort((a, b) => b.topFace - a.topFace);
-	const margin = 0.02 * width();
-	const startX = -0.22 * width() + margin;
-	const endX = 0.48 * width() - margin;
-	const step = (endX - startX) / dice.length;
-	dice.forEach((die, i) => {
-		const duration = 300;
-		const delay = 20 * i;
-		const position = new THREE.Vector3(startX + step * (i + 0.5), die.position.y, HEIGHT * 0.35);
-		animateDieQuaternion({ die, to: getDieRotation(die), duration, delay });
-		animateDiePosition({
-			die,
-			to: position,
-			duration,
-			delay,
-			then: (die) => {
-				oscillateDie(die);
-			},
+	dice.forEach((_, i) => {
+		moveToZone(dice, i, {
+			row: "bottom",
+			duration: 300,
+			delay: 20 * i,
 		});
 	});
 }

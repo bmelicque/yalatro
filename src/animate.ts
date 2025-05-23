@@ -14,6 +14,7 @@ export function animateDiePosition(params: AnimatePositionParams) {
 	const from = die.position.clone();
 	const position = new Vector3(from.x, from.y, from.z);
 	const start = performance.now();
+	let stop = false;
 
 	const animate = () => {
 		const elapsed = Math.max(0, performance.now() - start - delay);
@@ -23,10 +24,12 @@ export function animateDiePosition(params: AnimatePositionParams) {
 		position.lerpVectors(from, to, easedRate);
 		die.setPosition(position.x, position.y, position.z);
 
-		if (elapsed < duration) requestAnimationFrame(animate);
+		if (elapsed < duration && !stop) requestAnimationFrame(animate);
 		else then?.(die);
 	};
 	animate();
+
+	return () => void (stop = true);
 }
 
 type AnimateQuaternionParams = {
@@ -41,6 +44,7 @@ export function animateDieQuaternion(params: AnimateQuaternionParams) {
 	const from = die.quaternion.clone();
 	const q = die.quaternion.clone();
 	const start = performance.now();
+	let stop = false;
 
 	const animate = () => {
 		const elapsed = Math.max(0, performance.now() - start - delay);
@@ -50,9 +54,11 @@ export function animateDieQuaternion(params: AnimateQuaternionParams) {
 		q.slerpQuaternions(from, to, easedRate);
 		die.setQuaternion(q.x, q.y, q.z, q.w);
 
-		if (elapsed < duration) requestAnimationFrame(animate);
+		if (elapsed < duration && !stop) requestAnimationFrame(animate);
 	};
 	animate();
+
+	return () => void (stop = true);
 }
 
 function randomSign() {
